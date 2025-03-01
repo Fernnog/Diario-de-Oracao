@@ -9,16 +9,16 @@
     <link rel="icon" href="images/favicon.ico" type="image/x-icon">
 </head>
 <body>
-    <!-- ==== INÍCIO SEÇÃO - CABEÇALHO ==== -->
-    <div class="top-bar">
-    </div>
-    <div class="logo-container">
-        <img src="logo.png" alt="Logo" class="logo">
-    </div>
-    <div class="main-title">
-        <h1>Meus Alvos de Oração</h1>
-    </div>
-    <!-- ==== FIM SEÇÃO - CABEÇALHO ==== -->
+ <!-- ==== INÍCIO SEÇÃO - CABEÇALHO ==== -->
+<div class="top-bar">
+</div>
+<div class="logo-container">
+    <img src="logo.png" alt="Logo" class="logo">
+</div>
+<div class="main-title">
+    <h1>Meus Alvos de Oração</h1>
+</div>
+<!-- ==== FIM SEÇÃO - CABEÇALHO ==== -->
 
     <!-- ==== INÍCIO SEÇÃO - AUTENTICAÇÃO ==== -->
     <div id="authSection" class="auth-section" style="display: block;">
@@ -27,11 +27,11 @@
         <div class="auth-buttons">
             <button id="btnRegister" class="btn auth-btn">Registrar</button>
             <button id="btnLogin" class="btn auth-btn">Entrar</button>
-        </div>
+            </div>
         <div id="btnForgotPasswordContainer" class="forgot-password-container">
             <button id="btnForgotPassword" class="btn forgot-password-btn">Esqueci minha senha?</button>
         </div>
-        <!-- Envolve o status e o botão em um container (para Flexbox) -->
+         <!-- Envolve o status e o botão em um container (para Flexbox) -->
         <div class="auth-status-container">
             <p id="authStatus" class="auth-status">Nenhum usuário autenticado</p>
             <button id="btnLogout" class="btn auth-btn" style="display:none;">Sair</button>
@@ -43,16 +43,17 @@
     <!-- ==== INÍCIO SEÇÃO - MENU ==== -->
     <hr class="menu-separator">
     <div class="main-menu" id="mainMenu">
-        <button id="backToMainButton" class="btn">Página Inicial</button>
-        <button id="viewAllTargetsButton" class="btn">Ver Todos os Alvos</button>
-        <button id="viewArchivedButton" class="btn archived-resolved">Ver Arquivados</button>
-        <button id="viewResolvedButton" class="btn archived-resolved">Ver Respondidos</button>
+       <button id="backToMainButton" class="btn">Página Inicial</button>
+       <button id="viewAllTargetsButton" class="btn">Ver Todos os Alvos</button>
+       <button id="viewArchivedButton" class="btn archived-resolved">Ver Arquivados</button>
+       <button id="viewResolvedButton" class="btn archived-resolved">Ver Respondidos</button>
     </div>
     <hr class="menu-separator dark">
     <div class="main-menu" id="mainMenu">
         <button id="generateViewButton" class="btn generate-view action-btn">Gerar Visualização Geral</button>
-        <button id="generatePrayerReportButton" class="btn generate-view action-btn">Gerar Relatório de Orações</button>
         <button id="viewResolvedViewButton" class="btn generate-view action-btn">Visualizar Respondidos</button>
+        <!-- ADICIONAR O BOTÃO DE RELATÓRIO AQUI -->
+        <button id="generateReportButton" class="btn action-btn">Gerar Relatório de Cliques</button>
     </div>
     <hr class="menu-separator">
     <!-- ==== FIM SEÇÃO - MENU ==== -->
@@ -108,62 +109,62 @@
     </div>
     <!-- ==== FIM SEÇÃO - ALVOS DO DIA ==== -->
 
-    <!-- ==== INÍCIO SEÇÃO - PAINÉIS DE ALVOS ==== -->
-    <!-- Painel Principal com Alvos Ativos -->
-    <div class="targets-section" id="mainPanel" style="display: none;">
-        <h2>Alvos de Oração</h2>
-        <hr class="title-separator">
-        <input type="text" id="searchMain" placeholder="Pesquisar alvos..." class="search-input">
-        <hr class="search-separator">
-        <div class="filter-container">
-            <input type="checkbox" id="showDeadlineOnly" name="showDeadlineOnly">
-            <label for="showDeadlineOnly">Alvos de oração com prazo de vencimento</label>
-        </div>
-        <div class="filter-container">
-            <input type="checkbox" id="showExpiredOnlyMain" name="showExpiredOnlyMain">
-            <label for="showExpiredOnlyMain">Alvos de oração com prazo já vencido</label>
-        </div>
-        <hr class="filter-separator">
-        <div id="targetList"></div>
-        <div id="pagination-mainPanel"></div>
+  <!-- ==== INÍCIO SEÇÃO - PAINÉIS DE ALVOS ==== -->
+   <!-- Painel Principal com Alvos Ativos -->
+<div class="targets-section" id="mainPanel" style="display: none;">
+    <h2>Alvos de Oração</h2>
+    <hr class="title-separator">
+    <input type="text" id="searchMain" placeholder="Pesquisar alvos..." class="search-input">
+    <hr class="search-separator">
+    <div class="filter-container">
+        <input type="checkbox" id="showDeadlineOnly" name="showDeadlineOnly">
+        <label for="showDeadlineOnly">Alvos de oração com prazo de vencimento</label>
     </div>
+    <div class="filter-container">
+        <input type="checkbox" id="showExpiredOnlyMain" name="showExpiredOnlyMain">
+        <label for="showExpiredOnlyMain">Alvos de oração com prazo já vencido</label>
+    </div>
+    <hr class="filter-separator">
+    <div id="targetList"></div>
+    <div id="pagination-mainPanel"></div>
+</div>
 
-    <!-- Painel para Alvos Arquivados -->
-    <div class="targets-section" id="archivedPanel" style="display: none;">
-        <h2>Alvos Arquivados</h2>
-        <hr class="title-separator">
-        <input type="text" id="searchArchived" placeholder="Pesquisar alvos..." class="search-input">
-        <hr class="search-separator">
-        <div id="archivedList"></div>
-        <div id="pagination-archivedPanel"></div>
-    </div>
+<!-- Painel para Alvos Arquivados -->
+<div class="targets-section" id="archivedPanel" style="display: none;">
+    <h2>Alvos Arquivados</h2>
+    <hr class="title-separator">
+    <input type="text" id="searchArchived" placeholder="Pesquisar alvos..." class="search-input">
+    <hr class="search-separator">
+    <div id="archivedList"></div>
+    <div id="pagination-archivedPanel"></div>
+</div>
 
-    <!-- Painel para Alvos Respondidos -->
-    <div class="targets-section" id="resolvedPanel" style="display: none;">
-        <h2>Alvos Respondidos</h2>
-        <hr class="title-separator">
-        <input type="text" id="searchResolved" placeholder="Pesquisar alvos..." class="search-input">
-        <hr class="search-separator">
-        <div id="resolvedList"></div>
-        <div id="pagination-resolvedPanel"></div>
-    </div>
+<!-- Painel para Alvos Respondidos -->
+<div class="targets-section" id="resolvedPanel" style="display: none;">
+    <h2>Alvos Respondidos</h2>
+    <hr class="title-separator">
+    <input type="text" id="searchResolved" placeholder="Pesquisar alvos..." class="search-input">
+    <hr class="search-separator">
+    <div id="resolvedList"></div>
+    <div id="pagination-resolvedPanel"></div>
+</div>
 
-    <!-- Painel para Alvos com Prazo de Validade -->
-    <div class="targets-section" id="deadlinePanel" style="display: none;">
-        <h2>Alvos com Prazo de Validade</h2>
-        <hr class="title-separator">
-        <input type="text" id="searchDeadline" placeholder="Pesquisar alvos..." class="search-input">
-        <hr class="search-separator">
-        <!-- Checkbox para filtrar alvos vencidos -->
-        <div class="filter-container">
-            <input type="checkbox" id="showExpiredOnly" name="showExpiredOnly">
-            <label for="showExpiredOnly">Vencidos</label>
-        </div>
-        <hr class="filter-separator">
-        <div id="deadlineList"></div>
-        <div id="pagination-deadlinePanel"></div>
+<!-- Painel para Alvos com Prazo de Validade -->
+<div class="targets-section" id="deadlinePanel" style="display: none;">
+    <h2>Alvos com Prazo de Validade</h2>
+    <hr class="title-separator">
+    <input type="text" id="searchDeadline" placeholder="Pesquisar alvos..." class="search-input">
+    <hr class="search-separator">
+    <!-- Checkbox para filtrar alvos vencidos -->
+    <div class="filter-container">
+        <input type="checkbox" id="showExpiredOnly" name="showExpiredOnly">
+        <label for="showExpiredOnly">Vencidos</label>
     </div>
-    <!-- ==== FIM SEÇÃO - PAINÉIS DE ALVOS ==== -->
+    <hr class="filter-separator">
+    <div id="deadlineList"></div>
+    <div id="pagination-deadlinePanel"></div>
+</div>
+<!-- ==== FIM SEÇÃO - PAINÉIS DE ALVOS ==== -->
 
     <!-- ==== INÍCIO SEÇÃO - MODAIS ==== -->
     <!-- Modal para Seleção de Período -->
