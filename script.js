@@ -4,13 +4,13 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, si
 import { getFirestore, collection, doc, setDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, getDoc, increment } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDUbWB7F_4-tQ8K799wylf36IayGWgBuMU",
-  authDomain: "diario-de-oracao-268d3.firebaseapp.com",
-  projectId: "diario-de-oracao-268d3",
-  storageBucket: "diario-de-oracao-268d3.firebasestorage.app",
-  messagingSenderId: "561592831701",
-  appId: "1:561592831701:web:2a682317486837fd795c5c",
-  measurementId: "G-15YHNK7H2B"
+    apiKey: "AIzaSyDUbWB7F_4-tQ8K799wylf36IayGWgBuMU",
+    authDomain: "diario-de-oracao-268d3.firebaseapp.com",
+    projectId: "diario-de-oracao-268d3",
+    storageBucket: "diario-de-oracao-268d3.firebasestorage.app",
+    messagingSenderId: "561592831701",
+    appId: "1:561592831701:web:2a682317486837fd795c5c",
+    measurementId: "G-15YHNK7H2B"
 };
 
 // Initialize Firebase
@@ -456,7 +456,17 @@ document.getElementById('hasDeadline').addEventListener('change', function() {
 document.getElementById("prayerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const hasDeadline = document.getElementById("hasDeadline").checked;
-    const deadlineDate = hasDeadline ? formatDateToISO(new Date(document.getElementById("deadlineDate").value + "T00:00:00")) : null;
+    const deadlineDate = hasDeadline
+        ? formatDateToISO(new Date(document.getElementById("deadlineDate").value + "T00:00:00"))
+        : null;
+
+    // Obtém o ID do usuário atual
+    const userId = auth.currentUser ? auth.currentUser.uid : null;
+    if (!userId) {
+        alert("Usuário não autenticado.");
+        return; // Impede a continuação se não houver usuário
+    }
+
     const newTarget = {
         title: document.getElementById("title").value,
         details: document.getElementById("details").value,
@@ -464,26 +474,24 @@ document.getElementById("prayerForm").addEventListener("submit", async (e) => {
         resolved: false,
         observations: [],
         hasDeadline: hasDeadline,
-        deadlineDate: deadlineDate
+        deadlineDate: deadlineDate,
+        userId: userId, // Adiciona o userId ao novo alvo
     };
+
     try {
-        const user = auth.currentUser;
-        if (user) {
-            const docRef = doc(collection(db, "users", user.uid, "prayerTargets")); // Firestore auto-generates ID
-            await setDoc(docRef, newTarget);
-            await fetchPrayerTargets(user.uid); // Refresh targets from Firestore
-            currentPage = 1;
-            renderTargets();
-            document.getElementById("prayerForm").reset();
-            refreshDailyTargets();
-        } else {
-            alert("Usuário não autenticado.");
-        }
+        const docRef = doc(collection(db, "users", userId, "prayerTargets")); // Firestore auto-generates ID
+        await setDoc(docRef, newTarget);
+        await fetchPrayerTargets(userId); // Refresh targets from Firestore
+        currentPage = 1;
+        renderTargets();
+        document.getElementById("prayerForm").reset();
+        refreshDailyTargets();
     } catch (error) {
         console.error("Erro ao adicionar alvo no Firestore: ", error);
         alert("Erro ao adicionar alvo. Verifique o console.");
     }
 });
+
 
 
 async function markAsResolved(targetId) {
@@ -494,8 +502,9 @@ async function markAsResolved(targetId) {
             const targetDoc = await getDoc(targetRef); // Use getDoc here
 
              if (targetDoc.exists()) {
+                //Não precisa do userId aqui, já estamos na coleção do usuário correto
                 const resolvedTargetData = {...targetDoc.data(), resolved: true, archivedDate: formatDateToISO(new Date())};
-                const archivedRef = doc(collection(db, "users", user.uid, "archivedTargets"));
+                const archivedRef = doc(collection(db, "users", user.uid, "archivedTargets")); // Usa o UID do usuário
                 await setDoc(archivedRef, resolvedTargetData); // Save to archivedTargets
 
                 await deleteDoc(targetRef); // Delete from prayerTargets
@@ -529,8 +538,9 @@ async function archiveTarget(targetId) {
             const targetDoc = await getDoc(targetRef); // Use getDoc here
 
             if (targetDoc.exists()) {
+                //Não precisa do userId aqui, já estamos na coleção do usuário correto
                  const archivedTargetData = {...targetDoc.data(), archivedDate: formatDateToISO(new Date())};
-                const archivedRef = doc(collection(db, "users", user.uid, "archivedTargets"));
+                const archivedRef = doc(collection(db, "users", user.uid, "archivedTargets"));// Usa o UID do usuário
                 await setDoc(archivedRef, archivedTargetData); // Save to archivedTargets
 
                 await deleteDoc(targetRef); // Delete from prayerTargets
@@ -558,7 +568,7 @@ async function deleteArchivedTarget(targetId) {
         try {
             const user = auth.currentUser;
             if (user) {
-                const targetRef = doc(db, "users", user.uid, "archivedTargets", targetId);
+                const targetRef = doc(db, "users", user.uid, "archivedTargets", targetId); //Usa UID do usuário
                 await deleteDoc(targetRef);
                 await fetchArchivedTargets(user.uid);
                 resolvedTargets = archivedTargets.filter(target => target.resolved);
@@ -1012,7 +1022,7 @@ function addPrayButtonFunctionality(dailyDiv, targetIndex) {
     prayButton.classList.add("pray-button");
     prayButton.onclick = async () => {
         const targetId = dailyDiv.dataset.targetId;
-        const userId = auth.currentUser ? auth.currentUser.uid : null; // Opcional: rastrear por usuário
+        const userId = auth.currentUser ? auth.currentUser.uid : null; // Obtém o ID do usuário
 
         const db = getFirestore(app);
         const clickCountsRef = doc(db, "prayerClickCounts", targetId); // Referência ao documento do alvo
@@ -1024,9 +1034,10 @@ function addPrayButtonFunctionality(dailyDiv, targetIndex) {
             const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
             const year = now.getFullYear().toString();
 
-            // Dados a serem atualizados/criados
+            // Dados a serem atualizados/criados, incluindo o userId
             const updateData = {
-                targetId: targetId, // Pode ser redundante se o ID do doc for o targetId
+                targetId: targetId,
+                userId: userId, // Adiciona o userId
                 totalClicks: increment(1),
                 [`monthlyClicks.${yearMonth}`]: increment(1),  // Atualiza o campo específico do mês
                 [`yearlyClicks.${year}`]: increment(1)  //Atualiza o campo específico do Ano
@@ -1074,8 +1085,15 @@ document.getElementById('closePopup').addEventListener('click', () => {
 
 async function generateReport() {
     const db = getFirestore(app);
+	const userId = auth.currentUser ? auth.currentUser.uid : null; //Obtem o id do usuário logado
+     if (!userId) {
+        alert("Usuário não autenticado. Relatório não pode ser gerado.");
+        return;
+    }
     const clickCountsRef = collection(db, "prayerClickCounts");
-    const snapshot = await getDocs(clickCountsRef);
+    const q = query(clickCountsRef, where("userId", "==", userId)); //Filtra por userId
+    const snapshot = await getDocs(q); //Usa a query 'q'
+
 
     if (snapshot.empty) {
         alert("Nenhum dado de clique encontrado.");
@@ -1105,11 +1123,8 @@ async function generateReport() {
         report += "\n";
     });
 
-    // Exibir o relatório (pode ser em um alert, modal, ou nova seção da página)
-    // alert(report); //trocar para um modal ou uma div na tela
 
-    //Exibindo o modal com relatório
-    displayReportModal(report);
+    displayReportModal(report); //Chama a função do modal
 }
 
 function displayReportModal(reportText){
