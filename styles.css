@@ -53,7 +53,6 @@ h1 {
     color: #333;
     font-size: 2.5em;
 }
-
 /* ==== FIM SEÇÃO - ESTILOS GERAIS ==== */
 
 /* ==== INÍCIO SEÇÃO - ESTILOS DA SEÇÃO DE AUTENTICAÇÃO REMODELADA ==== */
@@ -69,14 +68,14 @@ h1 {
     margin-right: auto;
 }
 
-/* Adicione este bloco para usar Flexbox */
+/* Ajuste no container para garantir alinhamento perfeito */
 .auth-status-container {
     display: flex;
-    align-items: center; /* Alinha verticalmente ao centro */
+    align-items: center; /* Mantém o alinhamento vertical ao centro */
     justify-content: center; /* Centraliza horizontalmente */
-    gap: 10px; /* Espaço entre o e-mail e o botão */
+    gap: 10px; /* Espaço entre o texto e o botão */
+    margin-top: 10px; /* Opcional: ajuste da margem superior para posicionamento geral */
 }
-
 
 .auth-section input {
     margin: 8px 0;
@@ -92,6 +91,15 @@ h1 {
 
 .auth-buttons {
     margin-top: 15px;
+}
+
+/* Ajuste no botão Sair para garantir que ele tenha a mesma altura e alinhamento do texto */
+#btnLogout {
+    display: inline-flex; /* Usa flex para melhor controle do alinhamento interno */
+    align-items: center; /* Alinha o conteúdo interno (texto do botão) ao centro */
+    padding: 8px 18px; /* Mantém o padding do botão consistente com outros botões */
+    height: fit-content; /* Ajusta a altura para se adequar ao conteúdo */
+    margin: 0; /* Remove margens extras, se houver */
 }
 
 .auth-btn {
@@ -120,13 +128,11 @@ h1 {
 #btnLogout {
     background-color: #d35400;
     color: #fff;
-    /* Remova o display: inline-block; se você estiver usando Flexbox */
 }
 
 #btnLogout:hover {
     background-color: #b94800;
 }
-
 
 .forgot-password-container {
     margin-top: 10px;
@@ -146,12 +152,11 @@ h1 {
     color: #5f4012;
 }
 
+/* Opcional: garantir que o texto do status tenha o mesmo tamanho de linha que o botão */
 .auth-status {
-    margin-top: 0; /* Remove a margem superior para alinhar melhor */
-    margin-right: 0px; /*Zera la margem direita*/
-    font-size: 0.8em;
-    color: #777;
-
+    margin: 0; /* Remove margens extras */
+    font-size: 0.9em; /* Mantém consistente com outros textos, se necessário */
+    line-height: 1; /* Ajusta a altura da linha para melhor alinhamento */
 }
 
 .password-reset-message {
@@ -608,6 +613,7 @@ input[type="date"] {
     color: #555;
 }
 /* ==== FIM SEÇÃO - ESTILOS DOS VERSÍCULOS ==== */
+
 /* ==== INÍCIO SEÇÃO - ESTILOS PRAZO DE VALIDADE ==== */
 /* Estilo para a tag de prazo de validade */
 .deadline-tag {
@@ -634,8 +640,8 @@ input[type="date"] {
     background-color: #ff6666;
     color: #fff;
 }
-
 /* ==== FIM SEÇÃO - ESTILOS PRAZO DE VALIDADE ==== */
+
 /* ==== INÍCIO SEÇÃO - ESTILOS DO BOTÃO EDITAR PRAZO ==== */
 .target button.edit-deadline {
     background-color: #6599cc;
@@ -652,6 +658,7 @@ input[type="date"] {
     background-color: #4a77a5;
 }
 /* ==== FIM SEÇÃO - ESTILOS DO BOTÃO EDITAR PRAZO ==== */
+
 /* ==== INÍCIO SEÇÃO - ESTILOS CENTRALIZAR BOTÕES ==== */
 .daily-buttons-container {
     display: flex;
@@ -660,6 +667,7 @@ input[type="date"] {
     margin-top: 10px;
 }
 /* ==== FIM SEÇÃO - ESTILOS CENTRALIZAR BOTÕES ==== */
+
 /* ==== INÍCIO SEÇÃO - RESPONSIVIDADE ==== */
 /* Media query para telas menores */
 @media (max-width: 768px) {
