@@ -1,8 +1,10 @@
+// Imports do Firebase (versão 9.22.2)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, getDoc, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
+// Configuração do Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDUbWB7F_4-tQ8K799wylf36IayGWgBuMU",
   authDomain: "diario-de-oracao-268d3.firebaseapp.com",
@@ -13,13 +15,13 @@ const firebaseConfig = {
   measurementId: "G-15YHNK7H2B"
 };
 
-// Initialize Firebase
+// Inicialização do Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
-const db = getFirestore(app); // Initialize Firestore
+const db = getFirestore(app);
 
-// ==== VARIÁVEIS GLOBAIS ====
+// Variáveis Globais
 let prayerTargets = [];
 let archivedTargets = [];
 let resolvedTargets = [];
@@ -33,7 +35,7 @@ let currentSearchTermArchived = '';
 let currentSearchTermResolved = '';
 let showDeadlineOnly = false;
 
-// ==== FUNÇÕES UTILITÁRIAS ====
+// Funções Utilitárias
 function formatDateToISO(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -69,7 +71,7 @@ function generateUniqueId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
-// ==== FUNÇÕES AUXILIARES ====
+// Funções Auxiliares
 function rehydrateTargets(targets) {
     return targets.map(target => {
         if (target.date) target.date = new Date(target.date);
@@ -80,7 +82,7 @@ function rehydrateTargets(targets) {
     });
 }
 
-// ==== FUNÇÃO PARA ATUALIZAR A UI DE AUTENTICAÇÃO ====
+// Atualização da UI de Autenticação
 function updateAuthUI(user) {
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
@@ -89,21 +91,20 @@ function updateAuthUI(user) {
     const btnLogout = document.getElementById('btnLogout');
     const btnForgotPasswordContainer = document.getElementById('btnForgotPasswordContainer');
     const authStatus = document.getElementById('authStatus');
-    const authStatusContainer = document.querySelector('.auth-status-container'); // Obtém o container
+    const authStatusContainer = document.querySelector('.auth-status-container');
 
     if (user) {
         authStatus.textContent = "Usuário autenticado: " + user.email;
-        authStatusContainer.style.display = 'flex'; // Mostra o container (e seu conteúdo)
-        btnLogout.style.display = 'inline-block'; //redundancia proposital, questão de segurança
+        authStatusContainer.style.display = 'flex';
+        btnLogout.style.display = 'inline-block';
         emailInput.style.display = 'none';
         passwordInput.style.display = 'none';
         btnRegister.style.display = 'none';
         btnLogin.style.display = 'none';
         btnForgotPasswordContainer.style.display = 'none';
-
     } else {
         authStatus.textContent = "Nenhum usuário autenticado";
-        authStatusContainer.style.display = 'block'; // Certifique-se de que está visível
+        authStatusContainer.style.display = 'block';
         btnLogout.style.display = 'none';
         emailInput.style.display = 'block';
         passwordInput.style.display = 'block';
@@ -113,17 +114,15 @@ function updateAuthUI(user) {
     }
 }
 
-
-// ==== INICIALIZAÇÃO E LOGIN/AUTENTICAÇÃO ====
+// Inicialização e Carregamento de Dados
 async function loadData(user) {
-    updateAuthUI(user); // Atualiza a UI de autenticação
+    updateAuthUI(user);
 
     if (user) {
         document.getElementById('appContent').style.display = 'block';
         document.getElementById('dailySection').style.display = 'block';
         document.getElementById('sectionSeparator').style.display = 'block';
         document.getElementById('mainPanel').style.display = 'none';
-        // authSection já é controlado por updateAuthUI
 
         await fetchPrayerTargets(user.uid);
         await fetchArchivedTargets(user.uid);
@@ -135,12 +134,10 @@ async function loadData(user) {
         renderResolvedTargets();
         refreshDailyTargets();
     } else {
-        //usuário não logado
         document.getElementById('appContent').style.display = 'none';
         document.getElementById('dailySection').style.display = 'none';
         document.getElementById('sectionSeparator').style.display = 'none';
         document.getElementById('mainPanel').style.display = 'none';
-        // authSection já é controlado por updateAuthUI
 
         prayerTargets = [];
         archivedTargets = [];
@@ -155,7 +152,7 @@ async function loadData(user) {
 async function fetchPrayerTargets(uid) {
     prayerTargets = [];
     const targetsRef = collection(db, "users", uid, "prayerTargets");
-    const targetsSnapshot = await getDocs(query(targetsRef, orderBy("date", "desc"))); // Ordenar por data
+    const targetsSnapshot = await getDocs(query(targetsRef, orderBy("date", "desc")));
     targetsSnapshot.forEach((doc) => {
         prayerTargets.push({...doc.data(), id: doc.id});
     });
@@ -165,17 +162,16 @@ async function fetchPrayerTargets(uid) {
 async function fetchArchivedTargets(uid) {
     archivedTargets = [];
     const archivedRef = collection(db, "users", uid, "archivedTargets");
-    const archivedSnapshot = await getDocs(query(archivedRef, orderBy("archivedDate", "desc"))); // Ordenar por data de arquivo
+    const archivedSnapshot = await getDocs(query(archivedRef, orderBy("archivedDate", "desc")));
     archivedSnapshot.forEach((doc) => {
         archivedTargets.push({...doc.data(), id: doc.id});
     });
-     archivedTargets = rehydrateTargets(archivedTargets);
+    archivedTargets = rehydrateTargets(archivedTargets);
 }
-
 
 window.onload = () => {
     onAuthStateChanged(auth, (user) => {
-        loadData(user); // loadData chama updateAuthUI
+        loadData(user);
     });
     document.getElementById('searchMain').addEventListener('input', handleSearchMain);
     document.getElementById('searchArchived').addEventListener('input', handleSearchArchived);
@@ -184,41 +180,34 @@ window.onload = () => {
     document.getElementById('showExpiredOnlyMain').addEventListener('change', handleExpiredOnlyMainChange);
 };
 
-// ==== FUNÇÕES DE RENDERIZAÇÃO ====
+// Funções de Renderização
 function renderTargets() {
-  const targetList = document.getElementById("targetList");
-  targetList.innerHTML = "";
+    const targetList = document.getElementById("targetList");
+    targetList.innerHTML = "";
 
-  let filteredTargets = prayerTargets;
-  if (showDeadlineOnly) {
-    filteredTargets = filteredTargets.filter(
-      (t) => t.hasDeadline && !isDateExpired(t.deadlineDate)
-    );
-  }
-  const showExpiredOnlyMain =
-    document.getElementById("showExpiredOnlyMain").checked;
-  if (showExpiredOnlyMain) {
-    filteredTargets = filteredTargets.filter(
-      (t) => t.hasDeadline && isDateExpired(t.deadlineDate)
-    );
-  }
+    let filteredTargets = prayerTargets;
+    if (showDeadlineOnly) {
+        filteredTargets = filteredTargets.filter(t => t.hasDeadline && !isDateExpired(t.deadlineDate));
+    }
+    const showExpiredOnlyMain = document.getElementById("showExpiredOnlyMain").checked;
+    if (showExpiredOnlyMain) {
+        filteredTargets = filteredTargets.filter(t => t.hasDeadline && isDateExpired(t.deadlineDate));
+    }
 
-  filteredTargets = filterTargets(filteredTargets, currentSearchTermMain);
+    filteredTargets = filterTargets(filteredTargets, currentSearchTermMain);
 
-  const startIndex = (currentPage - 1) * targetsPerPage;
-  const endIndex = startIndex + targetsPerPage;
-  const targetsToDisplay = filteredTargets.slice(startIndex, endIndex);
+    const startIndex = (currentPage - 1) * targetsPerPage;
+    const endIndex = startIndex + targetsPerPage;
+    const targetsToDisplay = filteredTargets.slice(startIndex, endIndex);
 
-  targetsToDisplay.forEach((target) => {
-    const formattedDate = formatDateForDisplay(target.date);
-    const deadlineTag = target.hasDeadline
-      ? `<span class="deadline-tag ${
-          isDateExpired(target.deadlineDate) ? "expired" : ""
-        }">Prazo: ${formatDateForDisplay(target.deadlineDate)}</span>`
-      : "";
-    const targetDiv = document.createElement("div");
-    targetDiv.classList.add("target");
-    targetDiv.innerHTML = `
+    targetsToDisplay.forEach((target) => {
+        const formattedDate = formatDateForDisplay(target.date);
+        const deadlineTag = target.hasDeadline
+            ? `<span class="deadline-tag ${isDateExpired(target.deadlineDate) ? "expired" : ""}">Prazo: ${formatDateForDisplay(target.deadlineDate)}</span>`
+            : "";
+        const targetDiv = document.createElement("div");
+        targetDiv.classList.add("target");
+        targetDiv.innerHTML = `
             <h3>${deadlineTag} ${target.title}</h3>
             <p>${target.details}</p>
             <p><strong>Data:</strong> ${formattedDate}</p>
@@ -227,14 +216,8 @@ function renderTargets() {
             <button class="btn resolved">Marcar como Respondido</button>
             <button class="btn archive">Arquivar</button>
             <button class="btn add-observation">Adicionar Observação</button>
-            ${
-              target.hasDeadline
-                ? `<button class="btn edit-deadline">Editar Prazo</button>`
-                : ""
-            }
-            <div class="add-observation-form" data-target-id="${
-              target.id
-            }" style="display: none;">
+            ${target.hasDeadline ? `<button class="btn edit-deadline">Editar Prazo</button>` : ""}
+            <div class="add-observation-form" data-target-id="${target.id}" style="display: none;">
                 <h4 class="target-title"></h4>
                 <textarea placeholder="Escreva aqui a nova observação"></textarea>
                 <input type="date" >
@@ -244,25 +227,23 @@ function renderTargets() {
                 ${renderObservations(target.observations)}
             </div>
         `;
-    targetList.appendChild(targetDiv);
+        targetList.appendChild(targetDiv);
 
-    // Adicionando event listeners programaticamente
-    const resolvedButton = targetDiv.querySelector(".resolved");
-    const archiveButton = targetDiv.querySelector(".archive");
-    const addObservationButton = targetDiv.querySelector(".add-observation");
-    const editDeadlineButton = targetDiv.querySelector(".edit-deadline");
-    const saveObservationBtn = targetDiv.querySelector(".save-observation-btn");
+        const resolvedButton = targetDiv.querySelector(".resolved");
+        const archiveButton = targetDiv.querySelector(".archive");
+        const addObservationButton = targetDiv.querySelector(".add-observation");
+        const editDeadlineButton = targetDiv.querySelector(".edit-deadline");
+        const saveObservationBtn = targetDiv.querySelector(".save-observation-btn");
 
-    resolvedButton.addEventListener('click', () => markAsResolved(target.id));
-    archiveButton.addEventListener('click', () => archiveTarget(target.id));
-    addObservationButton.addEventListener('click', () => toggleAddObservation(target.id));
-    if (editDeadlineButton) {
-        editDeadlineButton.addEventListener('click', () => editDeadline(target.id));
-    }
-    saveObservationBtn.addEventListener('click', () => saveObservation(target.id));
-
-  });
-  renderPagination("mainPanel", currentPage, filteredTargets);
+        resolvedButton.addEventListener('click', () => markAsResolved(target.id));
+        archiveButton.addEventListener('click', () => archiveTarget(target.id));
+        addObservationButton.addEventListener('click', () => toggleAddObservation(target.id));
+        if (editDeadlineButton) {
+            editDeadlineButton.addEventListener('click', () => editDeadline(target.id));
+        }
+        saveObservationBtn.addEventListener('click', () => saveObservation(target.id));
+    });
+    renderPagination("mainPanel", currentPage, filteredTargets);
 }
 
 function renderArchivedTargets() {
@@ -285,11 +266,10 @@ function renderArchivedTargets() {
             <p><strong>Tempo Decorrido:</strong> ${timeElapsed(target.date)}</p>
             <p><strong>Status:</strong> ${target.resolved ? "Respondido" : "Arquivado"}</p>
             <p><strong>Data de Arquivo:</strong> ${formattedArchivedDate}</p>
-             <button class="btn delete">Excluir</button>
+            <button class="btn delete">Excluir</button>
         `;
         archivedList.appendChild(archivedDiv);
 
-        // Adicionando event listener para o botão "Excluir"
         const deleteButton = archivedDiv.querySelector(".delete");
         deleteButton.addEventListener('click', () => deleteArchivedTarget(target.id));
     });
@@ -316,11 +296,10 @@ function renderResolvedTargets() {
             <p><strong>Tempo Decorrido:</strong> ${timeElapsed(target.date)}</p>
             <p><strong>Status:</strong> Respondido</p>
             <p><strong>Data de Resolução:</strong> ${resolvedDate}</p>
-             <button class="btn delete">Excluir</button>
+            <button class="btn delete">Excluir</button>
         `;
         resolvedList.appendChild(resolvedDiv);
 
-        // Adicionando event listener para o botão "Excluir"
         const deleteButton = resolvedDiv.querySelector(".delete");
         deleteButton.addEventListener('click', () => deleteArchivedTarget(target.id));
     });
@@ -350,9 +329,7 @@ function renderPagination(panelId, page, targets) {
         pageLink.href = "#";
         pageLink.textContent = i;
         pageLink.classList.add("page-link");
-        if (i === page) {
-            pageLink.classList.add('active');
-        }
+        if (i === page) pageLink.classList.add('active');
         pageLink.addEventListener("click", (event) => {
             event.preventDefault();
             if (panelId === 'mainPanel') {
@@ -396,15 +373,14 @@ async function saveObservation(targetId) {
         const targetRef = doc(db, "users", userId, "prayerTargets", targetId);
 
         try {
-            const targetDoc = await getDoc(targetRef); // Use getDoc here
-
+            const targetDoc = await getDoc(targetRef);
             if (targetDoc.exists()) {
                 const targetData = targetDoc.data();
                 let updatedObservations = targetData.observations || [];
                 updatedObservations.push({ date: observationDate, observation: observationText });
 
                 await updateDoc(targetRef, { observations: updatedObservations });
-                await fetchPrayerTargets(userId); // Refresh targets from Firestore
+                await fetchPrayerTargets(userId);
                 renderTargets();
                 textarea.value = "";
                 dateInput.value = "";
@@ -414,14 +390,13 @@ async function saveObservation(targetId) {
                 alert("Erro ao salvar observação. Alvo não encontrado.");
             }
         } catch (error) {
-             console.error("Erro ao adicionar observação no Firestore: ", error);
-             alert("Erro ao salvar observação. Verifique o console.");
+            console.error("Erro ao adicionar observação no Firestore: ", error);
+            alert("Erro ao salvar observação. Verifique o console.");
         }
     } else {
         alert("Por favor, insira o texto da observação.");
     }
 }
-
 
 function handleDeadlineFilterChange() {
     showDeadlineOnly = document.getElementById("showDeadlineOnly").checked;
@@ -434,7 +409,7 @@ function handleExpiredOnlyMainChange() {
     renderTargets();
 }
 
-// ==== MANIPULAÇÃO DE DADOS ====
+// Manipulação de Dados
 document.getElementById('hasDeadline').addEventListener('change', function() {
     document.getElementById('deadlineContainer').style.display = this.checked ? 'block' : 'none';
 });
@@ -455,9 +430,9 @@ document.getElementById("prayerForm").addEventListener("submit", async (e) => {
     try {
         const user = auth.currentUser;
         if (user) {
-            const docRef = doc(collection(db, "users", user.uid, "prayerTargets")); // Firestore auto-generates ID
+            const docRef = doc(collection(db, "users", user.uid, "prayerTargets"));
             await setDoc(docRef, newTarget);
-            await fetchPrayerTargets(user.uid); // Refresh targets from Firestore
+            await fetchPrayerTargets(user.uid);
             currentPage = 1;
             renderTargets();
             document.getElementById("prayerForm").reset();
@@ -471,24 +446,20 @@ document.getElementById("prayerForm").addEventListener("submit", async (e) => {
     }
 });
 
-
 async function markAsResolved(targetId) {
     try {
         const user = auth.currentUser;
         if (user) {
             const targetRef = doc(db, "users", user.uid, "prayerTargets", targetId);
-            const targetDoc = await getDoc(targetRef); // Use getDoc here
-
-             if (targetDoc.exists()) {
+            const targetDoc = await getDoc(targetRef);
+            if (targetDoc.exists()) {
                 const resolvedTargetData = {...targetDoc.data(), resolved: true, archivedDate: formatDateToISO(new Date())};
                 const archivedRef = doc(collection(db, "users", user.uid, "archivedTargets"));
-                await setDoc(archivedRef, resolvedTargetData); // Save to archivedTargets
-
-                await deleteDoc(targetRef); // Delete from prayerTargets
+                await setDoc(archivedRef, resolvedTargetData);
+                await deleteDoc(targetRef);
                 await fetchPrayerTargets(user.uid);
                 await fetchArchivedTargets(user.uid);
                 resolvedTargets = archivedTargets.filter(target => target.resolved);
-
                 renderTargets();
                 renderArchivedTargets();
                 renderResolvedTargets();
@@ -506,20 +477,17 @@ async function markAsResolved(targetId) {
     }
 }
 
-
 async function archiveTarget(targetId) {
     try {
         const user = auth.currentUser;
         if (user) {
             const targetRef = doc(db, "users", user.uid, "prayerTargets", targetId);
-            const targetDoc = await getDoc(targetRef); // Use getDoc here
-
+            const targetDoc = await getDoc(targetRef);
             if (targetDoc.exists()) {
-                 const archivedTargetData = {...targetDoc.data(), archivedDate: formatDateToISO(new Date())};
+                const archivedTargetData = {...targetDoc.data(), archivedDate: formatDateToISO(new Date())};
                 const archivedRef = doc(collection(db, "users", user.uid, "archivedTargets"));
-                await setDoc(archivedRef, archivedTargetData); // Save to archivedTargets
-
-                await deleteDoc(targetRef); // Delete from prayerTargets
+                await setDoc(archivedRef, archivedTargetData);
+                await deleteDoc(targetRef);
                 await fetchPrayerTargets(user.uid);
                 await fetchArchivedTargets(user.uid);
                 renderTargets();
@@ -537,7 +505,6 @@ async function archiveTarget(targetId) {
         alert("Erro ao arquivar. Verifique o console.");
     }
 }
-
 
 async function deleteArchivedTarget(targetId) {
     if (confirm("Tem certeza de que deseja excluir este alvo permanentemente? Esta ação não pode ser desfeita.")) {
@@ -560,9 +527,7 @@ async function deleteArchivedTarget(targetId) {
     }
 }
 
-
-// ==== EVENT LISTENERS ====
-// Autenticação
+// Event Listeners - Autenticação
 document.addEventListener('DOMContentLoaded', () => {
     const btnRegister = document.getElementById('btnRegister');
     const btnLogin = document.getElementById('btnLogin');
@@ -591,7 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnLogin.addEventListener('click', async () => {
             const email = emailInput.value;
             const password = passwordInput.value;
-            if (!email || !password) { alert("Preencha email e senha para entrar."); return;}
+            if (!email || !password) { alert("Preencha email e senha para entrar."); return; }
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 loadData(userCredential.user);
@@ -632,13 +597,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-//Navegação
+// Event Listeners - Navegação
 document.getElementById('viewAllTargetsButton').addEventListener('click', () => {
     mainPanel.style.display = "block";
-    dailySection.style.display = "none";  archivedPanel.style.display = "none";
-    resolvedPanel.style.display = "none"; viewArchivedButton.style.display = "inline-block";
-    viewResolvedButton.style.display = "inline-block"; backToMainButton.style.display = "inline-block";
-    showDeadlineOnly = false; document.getElementById("showDeadlineOnly").checked = false;
+    dailySection.style.display = "none";
+    archivedPanel.style.display = "none";
+    resolvedPanel.style.display = "none";
+    viewArchivedButton.style.display = "inline-block";
+    viewResolvedButton.style.display = "inline-block";
+    backToMainButton.style.display = "inline-block";
+    showDeadlineOnly = false;
+    document.getElementById("showDeadlineOnly").checked = false;
     renderTargets();
 });
 
@@ -651,26 +620,38 @@ const archivedPanel = document.getElementById("archivedPanel");
 const resolvedPanel = document.getElementById("resolvedPanel");
 
 viewArchivedButton.addEventListener("click", () => {
-    mainPanel.style.display = "none";  dailySection.style.display = "none";
-    archivedPanel.style.display = "block"; resolvedPanel.style.display = "none";
-    viewArchivedButton.style.display = "none"; viewResolvedButton.style.display = "inline-block";
-    backToMainButton.style.display = "inline-block"; currentArchivedPage = 1;
+    mainPanel.style.display = "none";
+    dailySection.style.display = "none";
+    archivedPanel.style.display = "block";
+    resolvedPanel.style.display = "none";
+    viewArchivedButton.style.display = "none";
+    viewResolvedButton.style.display = "inline-block";
+    backToMainButton.style.display = "inline-block";
+    currentArchivedPage = 1;
     renderArchivedTargets();
 });
 
 viewResolvedButton.addEventListener("click", () => {
-    mainPanel.style.display = "none"; dailySection.style.display = "none";
-    archivedPanel.style.display = "none"; resolvedPanel.style.display = "block";
-    viewArchivedButton.style.display = "inline-block"; viewResolvedButton.style.display = "none";
-    backToMainButton.style.display = "inline-block"; currentResolvedPage = 1;
+    mainPanel.style.display = "none";
+    dailySection.style.display = "none";
+    archivedPanel.style.display = "none";
+    resolvedPanel.style.display = "block";
+    viewArchivedButton.style.display = "inline-block";
+    viewResolvedButton.style.display = "none";
+    backToMainButton.style.display = "inline-block";
+    currentResolvedPage = 1;
     renderResolvedTargets();
 });
 
 backToMainButton.addEventListener("click", () => {
-    mainPanel.style.display = "none"; dailySection.style.display = "block";
-    archivedPanel.style.display = "none"; resolvedPanel.style.display = "none";
-    viewArchivedButton.style.display = "inline-block"; viewResolvedButton.style.display = "inline-block";
-    backToMainButton.style.display = "none"; hideTargets();
+    mainPanel.style.display = "none";
+    dailySection.style.display = "block";
+    archivedPanel.style.display = "none";
+    resolvedPanel.style.display = "none";
+    viewArchivedButton.style.display = "inline-block";
+    viewResolvedButton.style.display = "inline-block";
+    backToMainButton.style.display = "none";
+    hideTargets();
     currentPage = 1;
 });
 
@@ -694,7 +675,9 @@ document.getElementById("copyDaily").addEventListener("click", function () {
 document.getElementById('generateViewButton').addEventListener('click', generateViewHTML);
 document.getElementById('viewDaily').addEventListener('click', generateDailyViewHTML);
 document.getElementById("viewResolvedViewButton").addEventListener("click", () => {
-    dateRangeModal.style.display = "block"; startDateInput.value = ''; endDateInput.value = '';
+    dateRangeModal.style.display = "block";
+    startDateInput.value = '';
+    endDateInput.value = '';
 });
 
 const dateRangeModal = document.getElementById("dateRangeModal");
@@ -708,17 +691,18 @@ closeDateRangeModalButton.addEventListener("click", () => { dateRangeModal.style
 
 generateResolvedViewButton.addEventListener("click", () => {
     const startDate = startDateInput.value;
-    const endDate = endDateInput.value;
-    const today = new Date();
-    const formattedToday = formatDateToISO(today);
-    const adjustedEndDate = endDate || formattedToday;
-    generateResolvedViewHTML(startDate, adjustedEndDate);
+    const endDate = endDateInput.value || formatDateToISO(new Date());
+    if (!startDate) {
+        alert("Por favor, selecione uma data de início.");
+        return;
+    }
+    generateResolvedViewHTML(startDate, endDate);
     dateRangeModal.style.display = "none";
 });
 
 cancelDateRangeButton.addEventListener("click", () => { dateRangeModal.style.display = "none"; });
 
-// ==== GERAÇÃO DE VISUALIZAÇÃO (HTML) ====
+// Geração de Visualização (HTML)
 function generateViewHTML() {
     const verseElement = document.getElementById('dailyVerses');
     const currentVerse = verseElement ? verseElement.textContent : 'Versículo não encontrado.';
@@ -739,11 +723,7 @@ function generateViewHTML() {
             .verse-container { font-style: italic; text-align: center; margin-bottom: 20px; color: #555; }
             .deadline-tag { background-color: #ffcc00; color: #333; padding: 5px 10px; border-radius: 5px; margin-left: 10px; font-size: 0.8em; }
             .expired { background-color: #ff6666; color: #fff; }
-            @media (max-width: 768px) {
-                body { font-size: 14px; }
-                h1 { font-size: 2em; }
-                h2 { font-size: 1.5em; }
-            }
+            @media (max-width: 768px) { body { font-size: 14px; } h1 { font-size: 2em; } h2 { font-size: 1.5em; } }
         </style>
     </head>
     <body>
@@ -763,7 +743,7 @@ function generateViewHTML() {
                 <p>${target.details}</p>
                 <p><strong>Data de Cadastro:</strong> ${formattedDate}</p>
                 <p><strong>Tempo Decorrido:</strong> ${time}</p>
-        `;
+            `;
             if (target.observations && target.observations.length > 0) {
                 htmlContent += `<h3>Observações:</h3>`;
                 target.observations.forEach(obs => {
@@ -806,11 +786,7 @@ function generateDailyViewHTML() {
             .verse-container { font-style: italic; text-align: center; margin-bottom: 20px; color: #555;}
             .deadline-tag { background-color: #ffcc00; color: #333; padding: 5px 10px; border-radius: 5px; margin-right: 10px; font-size: 0.8em;}
             .title-container { display: flex; align-items: center; justify-content: flex-start; }
-            @media (max-width: 768px) {
-                body { font-size: 14px; }
-                h1 { font-size: 2em; }
-                h2 { font-size: 1.5em; }
-            }
+            @media (max-width: 768px) { body { font-size: 14px; } h1 { font-size: 2em; } h2 { font-size: 1.5em; } }
         </style>
     </head>
     <body>
@@ -825,12 +801,9 @@ function generateDailyViewHTML() {
             const deadlineTag = div.querySelector('.deadline-tag')?.outerHTML || '';
             const titleElement = div.querySelector('h3');
             let title = titleElement ? titleElement.textContent.trim() : '';
-
             const details = div.querySelector('p:nth-of-type(1)')?.textContent || '';
             const timeElapsed = div.querySelector('p:nth-of-type(2)')?.textContent || '';
-            const observations = Array.from(div.querySelectorAll('h4 + p'))
-                .map(p => p.textContent)
-                .join('\n');
+            const observations = Array.from(div.querySelectorAll('h4 + p')).map(p => p.textContent).join('\n');
 
             htmlContent += `
             <div>
@@ -839,10 +812,8 @@ function generateDailyViewHTML() {
                 </div>
                 <p>${details}</p>
                 <p>${timeElapsed}</p>
-        `;
-            if (observations) {
-                htmlContent += `<h4>Observações:</h4><p>${observations}</p>`;
-            }
+            `;
+            if (observations) htmlContent += `<h4>Observações:</h4><p>${observations}</p>`;
             htmlContent += `</div><hr>`;
         });
     }
@@ -865,47 +836,40 @@ function generateResolvedViewHTML(startDate, endDate) {
 
     const filteredResolvedTargets = resolvedTargets.filter(target => {
         if (!target.resolved || !target.archivedDate) return false;
-
         const resolvedDateObj = new Date(target.archivedDate);
-
         if (startDateObj && resolvedDateObj < startDateObj) return false;
         if (endDateObj) {
             endDateObj.setHours(23, 59, 59);
             if (resolvedDateObj > endDateObj) return false;
         }
-
         return true;
     });
 
     let htmlContent = `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alvos Respondidos</title>
-    <style>
-        body { font-family: 'Playfair Display', serif; margin: 10px; padding: 10px; background-color: #f9f9f9; color: #333; font-size: 16px; }
-        h1 { text-align: center; color: #333; margin-bottom: 20px; font-size: 2.5em; }
-        h2 { color: #555; font-size: 1.75em; margin-bottom: 10px; }
-        div { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
-        p { margin: 5px 0; }
-        hr { margin-top: 30px; margin-bottom: 30px; border: 0; border-top: 1px solid #ddd; }
-        @media (max-width: 768px) {
-            body { font-size: 14px; }
-            h1 { font-size: 2em; }
-            h2 { font-size: 1.5em; }
-        }
-    </style>
-</head>
-<body>
-<h1>Alvos Respondidos</h1>`;
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Alvos Respondidos</title>
+        <style>
+            body { font-family: 'Playfair Display', serif; margin: 10px; padding: 10px; background-color: #f9f9f9; color: #333; font-size: 16px; }
+            h1 { text-align: center; color: #333; margin-bottom: 20px; font-size: 2.5em; }
+            h2 { color: #555; font-size: 1.75em; margin-bottom: 10px; }
+            div { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+            p { margin: 5px 0; }
+            hr { margin-top: 30px; margin-bottom: 30px; border: 0; border-top: 1px solid #ddd; }
+            @media (max-width: 768px) { body { font-size: 14px; } h1 { font-size: 2em; } h2 { font-size: 1.5em; } }
+        </style>
+    </head>
+    <body>
+    <h1>Alvos Respondidos</h1>`;
 
     if (filteredResolvedTargets.length === 0) {
         htmlContent += '<p>Nenhum alvo respondido encontrado para o período selecionado.</p>';
     } else {
         filteredResolvedTargets.forEach(target => {
             const formattedDate = formatDateForDisplay(target.date);
-            const formattedArchivedDate = formatDateForDisplay(target.archivedDate); // Formata a data de resolução
+            const formattedArchivedDate = formatDateForDisplay(target.archivedDate);
             htmlContent += `
             <div>
                 <h2>${target.title}</h2>
@@ -913,7 +877,7 @@ function generateResolvedViewHTML(startDate, endDate) {
                 <p><strong>Data Original:</strong> ${formattedDate}</p>
                 <p><strong>Data de Resolução:</strong> ${formattedArchivedDate}</p>
             </div><hr>
-        `;
+            `;
         });
     }
 
@@ -924,14 +888,12 @@ function generateResolvedViewHTML(startDate, endDate) {
     const a = document.createElement('a');
     a.href = url;
     const now = new Date();
-    const filename = `Alvos Respondidos - ${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}.html`;
-    a.download = filename;
+    a.download = `Alvos Respondidos - ${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}.html`;
     a.click();
     URL.revokeObjectURL(url);
 }
-// ==== FIM SEÇÃO - GERAÇÃO DE VISUALIZAÇÃO (HTML) ====
 
-// ==== INÍCIO SEÇÃO - FUNÇÕES DE BUSCA ====
+// Funções de Busca
 function filterTargets(targets, searchTerm) {
     if (!searchTerm) return targets;
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
@@ -959,9 +921,8 @@ function handleSearchResolved(event) {
     currentResolvedPage = 1;
     renderResolvedTargets();
 }
-// ==== FIM SEÇÃO - FUNÇÕES DE BUSCA ====
 
-// ==== INÍCIO SEÇÃO - VERSÍCULOS BÍBLICOS ====
+// Versículos Bíblicos
 const verses = [
     "Mateus 7:7-8: “Peçam, e será dado a vocês; busquem, e encontrarão; batam, e a porta será aberta a vocês. Pois todo o que pede recebe; o que busca encontra; e àquele que bate, a porta será aberta.”",
     "Marcos 11:24: \"Portanto, eu digo a vocês, tudo o que pedirem em oração, creiam que já o receberam, e será de vocês.\"",
@@ -981,21 +942,38 @@ const verses = [
     "1 Reis 18:37: “Responde-me, Senhor, responde-me, para que este povo saiba que tu, Senhor, és Deus, e que tu fizeste o coração deles voltar para ti.”",
     "Isaías 65:24: “E será que antes que clamem, eu responderei; estando eles ainda falando, eu os ouvirei.”"
 ];
+
 function displayRandomVerse() {
     const randomIndex = Math.floor(Math.random() * verses.length);
     const verseElement = document.getElementById('dailyVerses');
     verseElement.textContent = verses[randomIndex];
 }
-// ==== FIM SEÇÃO - VERSÍCULOS BÍBLICOS ====
 
-// ==== INÍCIO SEÇÃO - FUNCIONALIDADE DO BOTÃO "OREI!" ====
+// Funcionalidade do Botão "Orei!"
 function addPrayButtonFunctionality(dailyDiv, targetIndex) {
     const prayButton = document.createElement("button");
     prayButton.textContent = "Orei!";
     prayButton.classList.add("pray-button");
-    prayButton.onclick = () => {
-        dailyDiv.remove();
-        checkIfAllPrayersDone();
+    prayButton.onclick = async () => {
+        const user = auth.currentUser;
+        const target = lastDisplayedTargets[targetIndex];
+        if (user && target) {
+            try {
+                const logRef = collection(db, "users", user.uid, "prayerLogs");
+                await addDoc(logRef, {
+                    targetId: target.id,
+                    interactionType: "Orei",
+                    timestamp: serverTimestamp()
+                });
+                dailyDiv.remove();
+                checkIfAllPrayersDone();
+            } catch (error) {
+                console.error("Erro ao registrar clique no 'Orei': ", error);
+                alert("Erro ao registrar a oração. Verifique o console.");
+            }
+        } else {
+            alert("Usuário não autenticado ou alvo inválido.");
+        }
     };
     dailyDiv.insertBefore(prayButton, dailyDiv.firstChild);
 }
@@ -1012,47 +990,37 @@ function displayCompletionPopup() {
     popup.style.display = 'block';
 }
 
-// Adicionando o event listener para fechar o popup
 document.getElementById('closePopup').addEventListener('click', () => {
     document.getElementById('completionPopup').style.display = 'none';
 });
-// ==== FIM SEÇÃO - FUNCIONALIDADE DO BOTÃO "OREI!" ====
 
-// Atualizar os alvos diários
+// Atualizar Alvos Diários
 function refreshDailyTargets() {
     const dailyTargets = document.getElementById("dailyTargets");
     dailyTargets.innerHTML = "";
-    const dailyTargetsCount = Math.min(prayerTargets.length, 10); // Mostrar até 10 alvos
+    const dailyTargetsCount = Math.min(prayerTargets.length, 10);
 
-    // Filtrar alvos que não foram exibidos recentemente
     let availableTargets = prayerTargets.filter(target => !lastDisplayedTargets.includes(target));
-
-   // Se todos os alvos foram exibidos, reseta o histórico
     if (availableTargets.length === 0) {
         lastDisplayedTargets = [];
-        availableTargets = prayerTargets.slice(); // Cria uma cópia da array para evitar modificação direta
+        availableTargets = prayerTargets.slice();
     }
 
-    // Seleciona aleatoriamente os alvos
     const shuffledTargets = availableTargets.sort(() => 0.5 - Math.random());
     const selectedTargets = shuffledTargets.slice(0, dailyTargetsCount);
 
-    // Atualizar o histórico de exibição
     lastDisplayedTargets = [...lastDisplayedTargets, ...selectedTargets].slice(-prayerTargets.length);
 
     selectedTargets.forEach((target, index) => {
         const dailyDiv = document.createElement("div");
         dailyDiv.classList.add("target");
 
-             // Construindo o HTML para incluir título, detalhes e tempo decorrido, sem a tag de prazo no título
         const deadlineTag = target.hasDeadline ? `<span class="deadline-tag ${isDateExpired(target.deadlineDate) ? 'expired' : ''}">Prazo: ${formatDateForDisplay(target.deadlineDate)}</span>` : '';
         let contentHTML = `
             <h3>${deadlineTag} ${target.title}</h3>
-            <p>${target.details}</p> <!-- Inclui os detalhes (observações originais) -->
+            <p>${target.details}</p>
             <p><strong>Tempo Decorrido:</strong> ${timeElapsed(target.date)}</p>
         `;
-
-        // Adicionando observações, se existirem
         if (target.observations && target.observations.length > 0) {
             contentHTML += `<h4>Observações:</h4>`;
             target.observations.forEach(obs => {
@@ -1062,12 +1030,9 @@ function refreshDailyTargets() {
 
         dailyDiv.innerHTML = contentHTML;
         dailyTargets.appendChild(dailyDiv);
-
-        // Adicionar funcionalidade ao botão "Orei!"
         addPrayButtonFunctionality(dailyDiv, index);
     });
 
-    // Exibir versículo aleatório
     displayRandomVerse();
 }
 
@@ -1090,7 +1055,7 @@ async function editDeadline(targetId) {
         if (user) {
             const targetRef = doc(db, "users", user.uid, "prayerTargets", targetId);
             await updateDoc(targetRef, { deadlineDate: convertToISO(newDeadline) });
-            await fetchPrayerTargets(user.uid); // Refresh targets from Firestore
+            await fetchPrayerTargets(user.uid);
             renderTargets();
             alert(`Prazo de validade do alvo "${target.title}" atualizado para ${newDeadline}.`);
         } else {
@@ -1101,7 +1066,6 @@ async function editDeadline(targetId) {
         alert("Erro ao editar prazo. Verifique o console.");
     }
 }
-
 
 function isValidDate(dateString) {
     const parts = dateString.split('/');
@@ -1121,8 +1085,8 @@ function convertToISO(dateString) {
     return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
 }
 
-function hideTargets(){
-   const targetList = document.getElementById("targetList");
+function hideTargets() {
+    const targetList = document.getElementById("targetList");
     targetList.innerHTML = "";
 }
 
@@ -1131,4 +1095,87 @@ function checkExpiredDeadlines() {
     if (expiredTargets.length > 0) {
         alert('Os seguintes alvos estão com prazo de validade vencido:\n' + expiredTargets.map(target => `- ${target.title}\n`).join(''));
     }
+}
+
+// Função para Gerar Relatório de Orações
+async function generatePrayerReport(startDate, endDate) {
+    const user = auth.currentUser;
+    if (!user) {
+        alert("Usuário não autenticado.");
+        return;
+    }
+
+    try {
+        const logsRef = collection(db, "users", user.uid, "prayerLogs");
+        const q = query(
+            logsRef,
+            where("timestamp", ">=", new Date(startDate)),
+            where("timestamp", "<=", new Date(endDate)),
+            where("interactionType", "==", "Orei")
+        );
+        const snapshot = await getDocs(q);
+
+        const report = {};
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const targetId = data.targetId;
+            if (!report[targetId]) report[targetId] = 0;
+            report[targetId]++;
+        });
+
+        const detailedReport = {};
+        for (const targetId in report) {
+            const target = prayerTargets.find(t => t.id === targetId) || archivedTargets.find(t => t.id === targetId);
+            const title = target ? target.title : "Alvo excluído";
+            detailedReport[title] = report[targetId];
+        }
+
+        generateReportHTML(detailedReport, startDate, endDate);
+    } catch (error) {
+        console.error("Erro ao gerar relatório: ", error);
+        alert("Erro ao gerar relatório. Verifique o console.");
+    }
+}
+
+function generateReportHTML(report, startDate, endDate) {
+    let htmlContent = `<!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Relatório de Orações</title>
+        <style>
+            body { font-family: 'Playfair Display', serif; margin: 10px; padding: 10px; background-color: #f9f9f9; color: #333; font-size: 16px; }
+            h1 { text-align: center; color: #333; margin-bottom: 20px; font-size: 2.5em; }
+            h2 { color: #555; font-size: 1.75em; margin-bottom: 10px; }
+            table { width: 80%; margin: 20px auto; border-collapse: collapse; }
+            th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+            th { background-color: #e29420; color: #fff; }
+            tr:nth-child(even) { background-color: #fff; }
+            tr:nth-child(odd) { background-color: #f5f5f5; }
+        </style>
+    </head>
+    <body>
+        <h1>Relatório de Orações</h1>
+        <h2>Período: ${formatDateForDisplay(startDate)} a ${formatDateForDisplay(endDate)}</h2>
+        <table>
+            <tr><th>Alvo de Oração</th><th>Quantidade de Orações</th></tr>`;
+
+    if (Object.keys(report).length === 0) {
+        htmlContent += '<tr><td colspan="2">Nenhuma oração registrada no período.</td></tr>';
+    } else {
+        for (const [title, count] of Object.entries(report)) {
+            htmlContent += `<tr><td>${title}</td><td>${count}</td></tr>`;
+        }
+    }
+
+    htmlContent += `</table></body></html>`;
+
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Relatorio_Orações_${startDate}_a_${endDate}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
 }
