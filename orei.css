@@ -43,21 +43,19 @@ body {
 /* Estilos para os checkboxes de filtro */
 .filter-options {
     margin-bottom: 10px;
-    display: flex;         /* Adiciona Flexbox ao container */
-    flex-wrap: wrap;       /* Permite que os itens quebrem para a próxima linha */
-    gap: 15px;             /* Espaçamento *entre* os itens */
-}
-
-.filter-item {
-    display: flex;         /* Flexbox para alinhar checkbox e label */
-    align-items: center;   /* Alinhamento vertical */
-    gap: 5px;              /* Espaço entre checkbox e texto */
+    display: flex;          /* Mantenha o flexbox aqui para o *container* */
+    flex-wrap: wrap;        /* Permite quebra de linha */
+    gap: 15px;              /* Espaço *entre* os labels (horizontal e vertical) */
 }
 
 .filter-options label {
-    /* margin-right: 15px;  REMOVIDO - o gap em .filter-item controla o espaçamento */
+    margin-right: 5px;  /* Reduzido para aproximar.  Ajuste este valor! */
     cursor: pointer;
+    display: flex;      /* Flexbox *dentro* do label */
+    align-items: center; /* Centraliza verticalmente */
+    gap: 5px;         /* Espaço entre checkbox e texto */
 }
+
 
 /* Estilos para a paginação */
 .pagination {
