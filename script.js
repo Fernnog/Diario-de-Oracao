@@ -1,4 +1,3 @@
---- START OF FILE script.js ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
@@ -1285,4 +1284,3 @@ function checkExpiredDeadlines() {
         alert('Os seguintes alvos estão com prazo de validade vencido:\n' + expiredTargets.map(target => `- ${target.title}\n`).join(''));
     }
 }
---- END OF FILE script.js ---
