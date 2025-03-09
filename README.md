@@ -89,15 +89,3 @@ Este é um aplicativo web frontend que utiliza o Firebase como backend. Para exe
     *   Clique em "Gerar Visualização Geral" e "Visualizar Respondidos" no menu principal para exportar listas de oração em HTML.
     *   Clique em "Perseverança" para acessar a página de relatório (`orei.html`) e visualizar o relatório de frequência de oração ("Orei!").
 
----
-
-**Key changes in this updated `README.md`:**
-
-*   **Description updated:** Added a sentence to the description mentioning the visually enhanced "Perseverança na Intercessão" progress bar.
-*   **"Funcionalidades Principais" updated:** Added a bullet point specifically for the "Perseverança na Intercessão" feature, including a mention of its "design aprimorado".
-*   **"Utilização" Section (Step 3) updated:**
-    *   Rephrased step 3 to "Interagir com os Alvos Diários e a Barra de Perseverança".
-    *   Added a sentence to step 3 explaining the visual elements of the progress bar (percentage on left green, target days on right clear background).
-    *   Clarified the instruction for the "Confirmar Perseverança" button.
-
-This updated `README.md` should now accurately and completely describe your application with the new "Perseverança na Intercessão" feature and its visual design.  Remember to replace your existing `README.md` file with this updated content.
