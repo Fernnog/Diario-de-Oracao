@@ -262,10 +262,8 @@ function renderTargets() {
                 <input type="date" >
                 <button class="btn save-observation-btn">Salvar Observação</button>
             </div>
-            <div class="observations-list">
-                ${renderObservations(target.observations, true)}
-            </div>
-        `; // isExpanded: true for "Ver Todos os Alvos"
+            ${renderObservations(target.observations, true)}
+        `; // Passamos `true` para renderObservations
     targetList.appendChild(targetDiv);
 
     // Adicionando event listeners programaticamente
@@ -392,27 +390,25 @@ function renderPagination(panelId, page, targets) {
     }
 }
 
-function renderObservations(observations, isExpanded = false) {
+// ALTERAÇÃO: A função agora renderiza a lista sempre expandida.
+function renderObservations(observations, isExpanded = false) { // O parâmetro isExpanded é ignorado, mas mantido para compatibilidade.
     if (!observations || observations.length === 0) return '';
-    if (observations.length > 0) {
-        const observationsListHTML = observations.map(obs => `<p><strong>${formatDateForDisplay(obs.date)}:</strong> ${obs.observation}</p>`).join('');
-        const uniqueId = generateUniqueId(); // Generate a unique ID for each observations section
-         return `
-             <div class="observations-container">
-                 <button class="observations-toggle" data-target-id="${uniqueId}" onclick="toggleObservations('${uniqueId}')">Atualizações</button>
-                 <div id="observations-${uniqueId}" class="observations-list-collapsible" style="display: ${isExpanded ? 'block' : 'none'};">
-                     ${observationsListHTML}
-                 </div>
-             </div>
-         `;
-    }
-    return '';
+    
+    const observationsListHTML = observations.map(obs => 
+        `<p><strong>${formatDateForDisplay(obs.date)}:</strong> ${obs.observation}</p>`
+    ).join('');
+
+    // A lista agora é renderizada diretamente, sempre expandida.
+    // O botão e o div recolhível foram removidos.
+    return `
+        <div class="observations-list">
+            <h4>Atualizações:</h4>
+            ${observationsListHTML}
+        </div>
+    `;
 }
 
-window.toggleObservations = function(targetId) { // Make toggleObservations globally accessible
-    const observationsDiv = document.getElementById(`observations-${targetId}`);
-    observationsDiv.style.display = observationsDiv.style.display === 'none' ? 'block' : 'none';
-}
+// ALTERAÇÃO: A função toggleObservations foi removida por ser obsoleta.
 
 function toggleAddObservation(targetId) {
     const form = document.querySelector(`.add-observation-form[data-target-id="${targetId}"]`);
@@ -951,7 +947,7 @@ function generateResolvedViewHTML(startDate, endDate) {
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width-device-width, initial-scale=1.0">
     <title>Alvos Respondidos</title>
     <style>
         body { font-family: 'Playfair Display', serif; margin: 10px; padding: 10px; background-color: #f9f9f9; color: #333; font-size: 16px; }
