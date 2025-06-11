@@ -308,24 +308,18 @@ input[type="date"] {
 
 .observations-list {
     margin-top: 10px;
+    padding-left: 15px; /* Adiciona um pequeno recuo para a lista de observações */
+    border-left: 2px solid #f0f0f0; /* Linha vertical sutil à esquerda */
 }
 
-.observations-toggle {
-    background-color: #f0f0f0; /* Cor de fundo bem clara */
-    border: 1px solid #ddd; /* Borda leve */
-    color: #9cbe4a; /* Cor verde harmoniosa com "Orei!" */
-    cursor: pointer;
-    text-decoration: none; /* Remove underline */
-    font-size: 14px;
-    padding: 5px 10px; /* Padding pequeno para o botão */
-    margin-bottom: 5px; /* Add a little space below the button */
-    display: inline-block; /* Mantém inline para não ocupar toda a largura */
-    border-radius: 5px; /* Bordas arredondadas */
+/* ALTERAÇÃO: Adicionado estilo para o novo título h4 */
+.observations-list h4 {
+    color: #555;
+    margin-bottom: 8px;
+    font-size: 1.1em;
 }
 
-.observations-toggle:hover {
-    text-decoration: none; /* Remove underline on hover if desired */
-}
+/* ALTERAÇÃO: Removido o estilo para .observations-toggle e seu hover, pois o botão não existe mais */
 
 /* ==== FIM SEÇÃO - ESTILOS DO FORMULÁRIO DE ADICIONAR OBSERVAÇÕES ==== */
 /* ==== FIM SEÇÃO - ESTILOS DOS ALVOS ==== */
